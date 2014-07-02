@@ -7,8 +7,9 @@ The Spring scopes were extended with a "view" scope, which you can find in the d
 Further in the faces-config.xml the SpringBeanFacesELResolver is configured as EL resolver to make the Spring beans available
 the JSF.
 For validation Bean Validation is used. To validate that the startTime is greater than the endTime, a custom JSF validator
-is used(BeforeValidator).Persistence is achieved by using Spring Data and Hibernate. The application sets up a prefilled H2 in memory 
-database on startup.
+is used(BeforeValidator).Persistence is achieved by using Spring Data and neo4j. You need to configure the path where the database
+should be created in the applicationContext.xml. To reset the database( droppAll ;) ), just delete that directory.
+
 MyFaces was chosen as JSF implementation, since at the time of writing Mojarra had a rednering bug which impacted 
 the application(https://java.net/jira/browse/JAVASERVERFACES-3169).
 Since this is a rather basic demo application, we forewent the classic MVC pattern for simplicity's sake. Instead most
