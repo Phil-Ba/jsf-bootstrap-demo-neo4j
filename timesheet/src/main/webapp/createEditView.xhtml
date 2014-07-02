@@ -18,15 +18,15 @@
 			</div>
 			<div class="form-group">
 				<label for="start">Start time:</label> 
-				<input type="text" id="start" class="form-control" p:placeholder="Enter start time" jsf:value="#{dayController.event.startTimeLocal}" jsf:converter="#{timeConverter}">
+				<input type="text" id="start" class="form-control" p:placeholder="Enter start" jsf:value="#{dayController.event.startTime}" jsf:converter="#{timeConverter}">
 					<f:validator validatorId="beforeValidator"/>
-					<f:attribute name="end" value="#{end}"/>
+					<f:attribute name="otherValue" value="#{end}"/>
 				</input>
 				<cc:bsAlert inputId="start"/>	
 			</div>
 			<div class="form-group">
 				<label for="end">End time:</label> 
-				<input type="text" id="end" class="form-control" jsf:binding="#{end}" p:placeholder="Enter end time" jsf:value="#{dayController.event.endTimeLocal}" jsf:converter="#{timeConverter}"/>
+				<input type="text" id="end" class="form-control" jsf:binding="#{end}" p:placeholder="Enter end" jsf:value="#{dayController.event.endTime}" jsf:converter="#{timeConverter}"/>
 				<cc:bsAlert inputId="end"/>	
 			</div>
 			<button class="savebtn" jsf:action="#{dayController.save}">

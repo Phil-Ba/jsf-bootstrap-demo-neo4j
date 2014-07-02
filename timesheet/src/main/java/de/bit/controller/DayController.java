@@ -1,174 +1,113 @@
 package de.bit.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
+import javax.faces.component.html.HtmlInputText;
 import javax.faces.event.AjaxBehaviorEvent;
 
 import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.data.neo4j.support.Neo4jTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
 
-import de.bit.common.DateHelper;
+import de.bit.common.Constants;
+import de.bit.model.Date;
 import de.bit.model.Event;
+import de.bit.repository.DateRepository;
 import de.bit.repository.EventRepository;
 
-/**
- * JSF Controller handling the presentation and maintenance of Events.
- * 
- * @author philipp.bayer@bridging-it.de
- * @author christian.laboranowitsch@bridging-it.de
- * 
- */
 @Controller
-@Scope(value = "session")
+@Scope(value = WebApplicationContext.SCOPE_SESSION)
 public class DayController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DayController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DayController.class);
 
-    @Autowired
-    private EventRepository     eventRepo; //NOPMD
-    private LocalDate           selectedDate;
-    private LocalTime           startTime;
-    private LocalTime           endTime;
-    private String              name;
-    private List<Event>         events = new ArrayList<Event>();
+	@Autowired
+	private Neo4jTemplate templ;
 
-    private Event               event;
+	@Autowired
+	private DateRepository dateRepo;
 
-    @PostConstruct
-    private void init() { //NOPMD
-        LOGGER.debug("constructed");
-        selectedDate = new LocalDate();
-        updateEvents();
-    }
+	@Autowired
+	private EventRepository eventRepo;
 
-    private void updateEvents() {
-        events =
-                eventRepo.findByStartTimeGreaterThanEqualAndStartTimeLessThan(DateHelper.createMidnightOfToday(selectedDate),
-                        DateHelper.createMidnightOfNextDay(selectedDate));
-    }
+	private Date currentDate;
+	private Event event = new Event();
 
-    /**
-     * Creates a new Event
-     * @return page nav
-     */
-    public String newEvent() {
-        event = new Event();
-        event.setEndTime(selectedDate.toDateTimeAtCurrentTime().plusMinutes(30).toDate());
-        event.setStartTime(selectedDate.toDateTimeAtCurrentTime().toDate());
-        return "createEditView?faces-redirect=true";
-    }
+	@PostConstruct
+	@Transactional
+	private void init() {
+		LOGGER.debug("constructed");
+		findorCreateDate(new LocalDate());
+	}
 
-    /**
-     * Saves a new event in database
-     * @return page nav
-     */
-    public String save() {
-        eventRepo.save(event);
-        events.add(event);
-        resetData();
+	@Transactional
+	public String save() {
+		currentDate.getEvents().add(event);
+		event = new Event();
+		return "dayView";
+	}
 
-        return "index?faces-redirect=true";
-    }
+	public String cancel() {
+		event = new Event();
+		return "dayView";
+	}
 
-    private void resetData() {
-        event = null;
-        this.endTime = null;
-        this.startTime = null;
-        this.name = null;
-    }
+	@Transactional
+	public void next() {
+		findorCreateDate(currentDate.getDate().plusDays(1));
+	}
 
-    /**
-     * Don't save -> cancel 
-     * @return page nav
-     */
-    public String cancel() {
-        event = null;
-        return "index?faces-redirect=true";
-    }
+	@Transactional
+	public void gotoDate(final AjaxBehaviorEvent event) {
+		LOGGER.debug("gotoDate called");
+		Object source = event.getSource();
+		if (source instanceof HtmlInputText) {
+			LocalDate date = LocalDate.parse(((HtmlInputText) source).getValue().toString(), Constants.DATE_FORMATTER);
+			LOGGER.debug("gotoDate " + date.toString(Constants.DATE_FORMATTER));
+			findorCreateDate(date);
+		}
+	}
 
-    public Integer[] getHours() {
-        return DateHelper.getNumberOfHours();
-    }
+	@Transactional()
+	public void previous() {
+		findorCreateDate(currentDate.getDate().minusDays(1));
+	}
 
-    /**
-     * Select next day
-     */
-    public void next() {
-        LOGGER.debug("next called");
-        selectedDate = selectedDate.plusDays(1);
-        updateEvents();
-    }
+	private void findorCreateDate(final LocalDate now) {
+		// for some reason the index uses the .toString() value of an object,
+		// and not the actual value stored in the db
+		currentDate = dateRepo.findByPropertyValue("date", now.toString());
+		if (currentDate == null) {
+			currentDate = new Date();
+			currentDate.setDate(now);
+			currentDate = dateRepo.save(currentDate);
+		} else {
+			templ.fetch(currentDate.getEvents());
+			for (Event e : currentDate.getEvents()) {
+				LOGGER.info("Found event {} ({}-{})", e.getName(), e.getStartTime(), e.getEndTime());
+			}
+		}
+	}
 
-    /**
-     * Goto selected date
-     * @param event
-     */
-    public void gotoDate(final AjaxBehaviorEvent event) {
-        LOGGER.debug("gotoDate called");
-        updateEvents();
-    }
+	public Date getCurrentDate() {
+		return currentDate;
+	}
 
-    /**
-     * Select previous day
-     */
-    public void previous() {
-        LOGGER.debug("previous called");
-        selectedDate = selectedDate.minusDays(1);
-        updateEvents();
-    }
+	public void setCurrentDate(final Date currentDate) {
+		this.currentDate = currentDate;
+	}
 
-    public LocalDate getSelectedDate() {
-        return selectedDate;
-    }
+	public Event getEvent() {
+		return event;
+	}
 
-    public void setSelectedDate(final LocalDate selectedDate) {
-        this.selectedDate = selectedDate;
-    }
+	public void setEvent(final Event event) {
+		this.event = event;
+	}
 
-    public List<Event> getEvents() {
-        return events;
-    }
-
-    public void setEvents(final List<Event> events) {
-        this.events = events;
-    }
-
-    public LocalTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(final LocalTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(final LocalTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public Event getEvent() {
-        return event;
-    }
-
-    public void setEvent(final Event event) {
-        this.event = event;
-    }
 }

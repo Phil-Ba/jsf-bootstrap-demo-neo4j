@@ -12,7 +12,7 @@ template="templates/defaultTemplate.xhtml">
 
 				<h:form>
 					<ul class="nav nav-tabs">
-							<f:ajax event="click" render=":tabcontent1 :tabcontent2"  execute=":tabcontent1 :tabcontent2">
+							<f:ajax event="click" render=":tabcontent1 :tabcontent2" >
 								<li class="active">
 							  		<h:commandLink p:href="#day" p:data-toggle="tab">Tagesübersicht
 							  			<f:setPropertyActionListener target="#{tabController.activeTab}" value="day"/>

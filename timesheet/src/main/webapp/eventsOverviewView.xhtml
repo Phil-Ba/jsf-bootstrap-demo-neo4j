@@ -6,8 +6,11 @@
 	xmlns:cc="http://java.sun.com/jsf/composite/cc" 
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:c="http://java.sun.com/jsp/jstl/core" >
+	test2
+	hh
 		<h:form id="form" >
 			<cc:pagination paginationController="#{eventsOverviewController}" tableID=":form:dataTable" />
+			test
 			<div class="table-responsive">
 				<h:dataTable id="dataTable" var="event" columnClasses="w25, w25, w25, w25" value="#{eventsOverviewController.fetchCurrentPage()}" styleClass="eventtable">
 					<h:column>
@@ -16,7 +19,7 @@
 					</h:column>
 					<h:column>
 						<f:facet name="header">Datum</f:facet>
-						#{event.dateStr}
+						#{event.date.dateStr}
 					</h:column>
 					<h:column>
 						<f:facet name="header">Beginn</f:facet>

@@ -25,8 +25,7 @@
 					</button>
 				</div>
 				<div class="middle input-group date" id="datepicker">
-					<input type="text"  p:readonly="readonly" jsf:id="date" value="#{dayController.selectedDate}">
-						<f:converter converterId="at.bit.JsfLocalDateConverter"/>
+					<input type="text"  p:readonly="readonly" jsf:id="date" value="#{dayController.currentDate.dateStr}">
 						<f:ajax event="change" listener="#{dayController.gotoDate}" render="table" />
 					</input>
 					 <span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
@@ -46,26 +45,26 @@
 
 	<h:panelGroup layout="block" styleClass="table-responsive" id="table">
 		<table class="daytable">
-			<ui:repeat value="#{dayController.hours}" var="hour">
-				<ui:fragment rendered="#{dayController.events.size() ne 0}">
+			<ui:repeat value="#{constants.hours}" var="hour">
+				<ui:fragment rendered="#{dayController.currentDate.events.size() ne 0}">
 					<tr>
 						<td class="">#{hour} Uhr</td>
-						<ui:repeat var="data" value="#{dayController.events}">
-							<ui:fragment rendered="#{data.startDateTime.hourOfDay eq hour}">
+						<ui:repeat var="data" value="#{dayController.currentDate.events}">
+							<ui:fragment rendered="#{data.startTime.hourOfDay eq hour}">
 								<td rowspan="#{data.durationHours()}">
-									<div class="eventblock" style="height: #{data.durationMinutes()}px; top:#{data.startDateTime.minuteOfHour}px;">
+									<div class="eventblock" style="height: #{data.durationMinutes()}px; top:#{data.startTime.minuteOfHour}px;">
 										<p>#{data.name}</p>
-										<p>#{timeToStringConverter.convert(data.startDateTime)}-#{timeToStringConverter.convert(data.endDateTime)}</p>
+										<p>#{timeToStringConverter.convert(data.startTime)}-#{timeToStringConverter.convert(data.endTime)}</p>
 									</div>
 								</td>
 							</ui:fragment>
-							<ui:fragment rendered="#{hour lt data.startDateTime.hourOfDay or  hour gt data.endDateTime.hourOfDay}">
+							<ui:fragment rendered="#{hour lt data.startTime.hourOfDay or  hour gt data.endTime.hourOfDay}">
 								<td></td>
 							</ui:fragment>
 						</ui:repeat>
 					</tr>
 				</ui:fragment>
-				<ui:fragment rendered="#{dayController.events.size() eq 0}">
+				<ui:fragment rendered="#{dayController.currentDate.events.size() eq 0}">
 					<tr>
 						<td class="">#{hour} Uhr</td>
 						<td class=""></td>
