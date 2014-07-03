@@ -8,12 +8,12 @@ Further in the faces-config.xml the SpringBeanFacesELResolver is configured as E
 the JSF.
 For validation Bean Validation is used. To validate that the startTime is greater than the endTime, a custom JSF validator
 is used(BeforeValidator).Persistence is achieved by using Spring Data and neo4j. You need to configure the path where the database
-should be created in the applicationContext.xml. To reset the database( droppAll ;) ), just delete that directory.
+should be created in the applicationContext.xml. To reset the database( droppAll ;) ), just delete that directory. The data model is rather simple: for each given date there exists a date entity. Events are connected to these data entities.
 
 MyFaces was chosen as JSF implementation, since at the time of writing Mojarra had a rednering bug which impacted 
 the application(https://java.net/jira/browse/JAVASERVERFACES-3169).
 Since this is a rather basic demo application, we forewent the classic MVC pattern for simplicity's sake. Instead most
-of the logic is handled by the controllers, even persistence which should  ideally handled in the service layer.
+of the logic is handled by the controllers, even persistence which should  ideally handled in the service layer. The dayController handles most of the grunt work, and contains the current date and event entity .
 
 The main page, index.xhtml, consists of two tabs. The tab controller holds the information which tab is currently active.
 Only the active tab is renders. Clicking a tab will trigger an AJAX request which will repaint the tab contents. The content
