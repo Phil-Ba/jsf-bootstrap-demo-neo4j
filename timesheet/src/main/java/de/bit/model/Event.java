@@ -1,5 +1,8 @@
 package de.bit.model;
 
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.NotBlank;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.data.annotation.Id;
@@ -15,11 +18,15 @@ public class Event {
 	private Long id;
 
 	@Indexed
+	@NotBlank
 	private String name;
 
 	@Indexed
+	@NotNull
 	private LocalTime startTime = new LocalTime();
+
 	@Indexed
+	@NotNull
 	private LocalTime endTime = new LocalTime();
 
 	public long durationMinutes() {
